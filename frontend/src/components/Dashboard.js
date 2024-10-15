@@ -1,13 +1,11 @@
-// src/components/Dashboard.js
 import React, { useEffect, useState } from 'react';
-import { Bar, Pie } from 'react-chartjs-2';
-import { Chart, CategoryScale, LinearScale, BarElement, Title, ArcElement, Legend } from 'chart.js';
+import { Bar, Pie, Line, Doughnut } from 'react-chartjs-2';
+import { Chart, CategoryScale, LinearScale, BarElement, Title, ArcElement, Legend, TimeScale, LineElement, PointElement } from 'chart.js';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { Container, Typography, List, ListItem, CircularProgress, Box, Paper } from '@mui/material';
+import { Container, Typography, List, ListItem, CircularProgress, Box, Paper, Grid } from '@mui/material';
 
-// Register the components
-Chart.register(CategoryScale, LinearScale, BarElement, Title, ArcElement, Legend);
+Chart.register(CategoryScale, LinearScale, BarElement, Title, ArcElement, Legend, TimeScale, LineElement, PointElement);
 
 function Dashboard() {
   const [studentData, setStudentData] = useState([]);
@@ -65,22 +63,59 @@ function Dashboard() {
     ],
   };
 
-  const pieOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'bottom',
+  const attendanceData = {
+    labels: studentData.map(student => student.name || 'Unnamed'),
+    datasets: [
+      {
+        label: 'Attendance Percentage',
+        data: studentData.map(student => student.attendancePercentage || 0),
+        borderColor: 'rgba(255, 99, 132, 0.6)',
+        backgroundColor: 'rgba(255, 99, 132, 0.1)',
       },
-    },
-    maintainAspectRatio: false,
+    ],
+  };
+
+  const cgpaData = {
+    labels: ['Below 5', '5-7', '7-9', '9-10'],
+    datasets: [
+      {
+        data: [
+          studentData.filter(student => student.cgpa < 5).length,
+          studentData.filter(student => student.cgpa >= 5 && student.cgpa < 7).length,
+          studentData.filter(student => student.cgpa >= 7 && student.cgpa < 9).length,
+          studentData.filter(student => student.cgpa >= 9).length,
+        ],
+        backgroundColor: ['#FF6347', '#FFA500', '#32CD32', '#4682B4'],
+      },
+    ],
+  };
+
+  const subjectAverages = studentData.reduce((acc, student) => {
+    student.subjects.forEach(subject => {
+      acc[subject.name] = acc[subject.name] || { total: 0, count: 0 };
+      acc[subject.name].total += subject.marks;
+      acc[subject.name].count++;
+    });
+    return acc;
+  }, {});
+
+  const averageSubjectData = {
+    labels: Object.keys(subjectAverages),
+    datasets: [
+      {
+        label: 'Average Marks',
+        data: Object.values(subjectAverages).map(subj => subj.total / subj.count),
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+      },
+    ],
   };
 
   if (loading) {
-    return <CircularProgress />; // Show loading spinner while fetching data
+    return <CircularProgress />;
   }
 
   if (error) {
-    return <Typography color="error">{error}</Typography>; // Show error message if there's an error
+    return <Typography color="error">{error}</Typography>;
   }
 
   return (
@@ -89,48 +124,84 @@ function Dashboard() {
         Dashboard
       </Typography>
 
-      <Paper elevation={3} style={{ padding: '16px', marginBottom: '16px' }}>
-        <Typography variant="h5">Number of Students by Grade</Typography>
-        <List>
-          <ListItem>Grade A: {gradeCounts.A}</ListItem>
-          <ListItem>Grade B: {gradeCounts.B}</ListItem>
-          <ListItem>Grade C: {gradeCounts.C}</ListItem>
-          <ListItem>Grade D: {gradeCounts.D}</ListItem>
-        </List>
-      </Paper>
+      <Grid container spacing={3} alignItems="center">
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={3} style={{ padding: '16px' }}>
+            <Typography variant="h5">Number of Students by Grade</Typography>
+            <List>
+              <ListItem>Grade A: {gradeCounts.A}</ListItem>
+              <ListItem>Grade B: {gradeCounts.B}</ListItem>
+              <ListItem>Grade C: {gradeCounts.C}</ListItem>
+              <ListItem>Grade D: {gradeCounts.D}</ListItem>
+            </List>
+          </Paper>
+        </Grid>
 
-      {studentData.length > 0 ? (
-        <Box style={{ marginBottom: '16px' }}>
-          <Bar data={barData} />
-        </Box>
-      ) : (
-        <Typography>No student data available for bar chart</Typography>
-      )}
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={3} style={{ padding: '16px' }}>
+            <Typography variant="h5" gutterBottom>
+              CGPA per Student
+            </Typography>
+            <Box style={{ width: '100%', height: '400px' }}>
+              <Bar data={barData} options={{ maintainAspectRatio: false }} />
+            </Box>
+          </Paper>
+        </Grid>
 
-      <Typography variant="h5" gutterBottom>
-        Grade Distribution
-      </Typography>
-      <Box style={{ marginBottom: '16px' }}>
-        {studentData.length > 0 ? (
-          <Pie data={pieData} options={pieOptions} />
-        ) : (
-          <Typography>No student data available for pie chart</Typography>
-        )}
-      </Box>
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={3} style={{ padding: '16px' }}>
+            <Typography variant="h5" gutterBottom>
+              Grade Distribution
+            </Typography>
+            <Box style={{ maxWidth: '300px', margin: '0 auto' }}>
+              <Pie data={pieData} />
+            </Box>
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={3} style={{ padding: '16px' }}>
+            <Typography variant="h5" gutterBottom>
+              Attendance Trends
+            </Typography>
+            <Box style={{ width: '100%', height: '400px' }}>
+              <Line data={attendanceData} options={{ maintainAspectRatio: false }} />
+            </Box>
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={3} style={{ padding: '16px' }}>
+            <Typography variant="h5" gutterBottom>
+              Average Grades per Subject
+            </Typography>
+            <Box style={{ width: '100%', height: '400px' }}>
+              <Bar data={averageSubjectData} options={{ maintainAspectRatio: false }} />
+            </Box>
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={4}>
+          <Paper elevation={3} style={{ padding: '16px' }}>
+            <Typography variant="h5" gutterBottom>
+              CGPA Distribution
+            </Typography>
+            <Box style={{ maxWidth: '300px', margin: '0 auto' }}>
+              <Doughnut data={cgpaData} />
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
 
       <Typography variant="h5" gutterBottom>
         Students List
       </Typography>
       <List>
-        {studentData.length > 0 ? (
-          studentData.map(student => (
-            <ListItem key={student._id}>
-              <Link to={`/student/${student._id}`}>{student.name}</Link>
-            </ListItem>
-          ))
-        ) : (
-          <ListItem>No students available.</ListItem>
-        )}
+        {studentData.map(student => (
+          <ListItem key={student._id}>
+            <Link to={`/student/${student._id}`}>{student.name}</Link>
+          </ListItem>
+        ))}
       </List>
     </Container>
   );

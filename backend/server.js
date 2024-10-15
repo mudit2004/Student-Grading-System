@@ -6,7 +6,7 @@ const cors = require('cors');
 const studentRoutes = require('./routes/studentRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 3001; // Use environment variable for the port
+const PORT = 3001; // Use environment variable for the port
 
 // Middleware
 app.use(cors());
