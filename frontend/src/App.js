@@ -5,7 +5,7 @@ import Navbar from './components/Navbar'; // Import the Navbar component
 import AddStudent from './components/AddStudent'; // Import AddStudent component
 import StudentList from './components/StudentList'; // Import StudentList component
 import UpdateStudent from './components/UpdateStudent'; // Import UpdateStudent component
-import Dashboard from './components/Dashboard'; // Import the Dashboard component
+import Dashboard from './components/Dashboard/Dashboard'; // Import the Dashboard component
 import StudentProfile from './components/StudentProfile'; // Import StudentProfile component
 
 
