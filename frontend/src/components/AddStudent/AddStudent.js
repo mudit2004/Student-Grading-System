@@ -1,8 +1,8 @@
-// src/components/AddStudent.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Button, TextField, Container, Typography } from '@mui/material';
+import { Button, TextField, Container, Typography, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import SubjectDropdown from './SubjectDropdown';
 
 function AddStudent() {
   const [student, setStudent] = useState({
@@ -15,6 +15,9 @@ function AddStudent() {
   });
 
   const navigate = useNavigate();
+
+  // Predefined subjects for the dropdown
+  const availableSubjects = ['Full Stack', 'OT', 'Deep Learning', 'Math', 'Computer Science'];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -40,7 +43,7 @@ function AddStudent() {
   };
 
   const validatePhone = (phone) => {
-    const re = /^[0-9]{10}$/; // Simple regex for 10-digit phone numbers
+    const re = /^[0-9]{10}$/;
     return re.test(phone);
   };
 
@@ -64,8 +67,8 @@ function AddStudent() {
         email: '',
         phone: '',
         subjects: [{ name: '', marks: '', hoursAttended: '' }],
-      }); // Clear the form fields after submission
-      navigate('/'); // Redirect to the student list after successful submission
+      });
+      navigate('/');
     } catch (error) {
       console.error('Error adding student:', error);
     }
@@ -134,13 +137,12 @@ function AddStudent() {
         </Typography>
         {student.subjects.map((subject, index) => (
           <div key={index} style={{ marginBottom: '16px' }}>
-            <TextField
-              label="Subject Name"
+             {/* Use SubjectDropdown instead of TextField for subject name */}
+             <SubjectDropdown
               value={subject.name}
-              onChange={(e) => handleSubjectChange(index, 'name', e.target.value)}
-              required
-              fullWidth
-              margin="normal"
+              onChange={handleSubjectChange}
+              index={index}
+              availableSubjects={availableSubjects} // Pass available subjects as a prop
             />
             <TextField
               label="Marks Obtained"

@@ -2,7 +2,7 @@
 import React from 'react'; // Import React library
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Import Router components for routing
 import Navbar from './components/Navbar'; // Import the Navbar component
-import AddStudent from './components/AddStudent'; // Import AddStudent component
+import AddStudent from './components/AddStudent/AddStudent'; // Import AddStudent component
 import StudentList from './components/StudentList'; // Import StudentList component
 import UpdateStudent from './components/UpdateStudent'; // Import UpdateStudent component
 import Dashboard from './components/Dashboard/Dashboard'; // Import the Dashboard component
